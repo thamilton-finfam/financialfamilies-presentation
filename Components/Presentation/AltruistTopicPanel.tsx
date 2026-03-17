@@ -73,7 +73,7 @@ export default function AltruistTopicPanel({ brand }: { brand: Brand }) {
           <div className="mb-2 font-semibold">How they fit in the industry</div>
           <div className="text-sm leading-6 md:text-base" style={{ color: brand.slate }}>
             They are competing with firms like Schwab and Fidelity, but focus exclusively
-            on advisor-supported relationships rather than retail accounts.
+            on advisor-supported relationships rather than retail accounts. Account transfers are efficient and do not trigger taxation. 
           </div>
         </div>
       </div>

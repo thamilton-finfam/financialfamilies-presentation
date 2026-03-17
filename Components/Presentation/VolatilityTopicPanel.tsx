@@ -38,7 +38,7 @@ export default function VolatilityTopicPanel({ brand }: { brand: Brand }) {
         <div>
           <div className="mb-2 font-semibold">Why it happens</div>
           <div className="text-sm leading-6 md:text-base" style={{ color: brand.slate }}>
-            Markets continuously adjust based on earnings expectations, interest rates, and investor behavior. These adjustments create short-term declines that are necessary for long-term returns.
+            Markets continuously adjust based on earnings expectations, interest rates, and investor behavior. These adjustments create short-term declines that are opportunities for long-term returns.
           </div>
         </div>
       </div>
