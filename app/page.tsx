@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Briefcase,
@@ -13,6 +13,18 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
+
+import ExpenseTopicPanel from "@/Components/Presentation/ExpenseTopicPanel";
+import VolatilityTopicPanel from "@/Components/Presentation/VolatilityTopicPanel";
+import RebalancingTopicPanel from "@/Components/Presentation/RebalancingTopicPanel";
+import StockDiversificationPanel from "@/Components/Presentation/StockDiversificationPanel";
+import BondsTopicPanel from "@/Components/Presentation/BondsTopicPanel";
+import BondDiversificationPanel from "@/Components/Presentation/BondDiversificationPanel";
+import AssetLocationTopicPanel from "@/Components/Presentation/AssetLocationTopicPanel";
+import TaxLossHarvestingPanel from "@/Components/Presentation/TaxLossHarvestingPanel";
+import SpendingTopicPanel from "@/Components/Presentation/SpendingTopicPanel";
+import AltruistTopicPanel from "@/Components/Presentation/AltruistTopicPanel";
+
 
 type SectionKey = "home" | "about" | "fiduciary" | "process" | "choice" | "investments";
 
@@ -76,7 +88,7 @@ const navCards: NavCard[] = [
     key: "investments",
     label: "Investment Approach",
     icon: LineChart,
-    text: "How portfolios are shaped around goals, taxes, risk, and real life.",
+    text: "Explore the principles behind how FinancialFamilies constructs and manages portfolios.",
   },
 ];
 
@@ -96,12 +108,24 @@ const processDetails = [
   "After implementation begins, clients have year-round access via in-person meetings, virtual meetings, email, or phone. Most families become accustomed to ready availability and prefer two meetings per year. At least one formal annual meeting is requested.",
 ];
 
-const investmentPoints = [
-  "Portfolios should be customized to the family, not copied from a generic template.",
-  "Stocks can drive long-term growth, but volatility must be understood and remain tolerable.",
-  "Taxes materially affect investment outcomes and should influence implementation.",
-  "Investment decisions should serve goals because families invest in order to spend someday.",
-  "Families can hold investment accounts wherever they prefer. If no preference exists, FinancialFamilies suggests Altruist. Transferring accounts is straightforward and does not trigger taxation.",
+const investmentTopics = [
+  "Stocks: how equities drive growth",
+  "Bonds: stability and income",
+  "Portfolio allocation: stocks and bonds",
+  "Stock diversification",
+  "Bond diversification",
+  "Expense ratios: cost discipline",
+  "Volatility: how markets move",
+  "Spending: investing to support life goals",
+  "Asset location: placing investments in the right accounts",
+  "Tax-loss harvesting",
+  "Rebalancing: shifting from recent winners to recent laggards",
+  "Altruist custodial platform",
+];
+
+const allocationBuckets = [
+  { label: "Stocks", range: "Primary growth engine" },
+  { label: "Bonds", range: "Primary stability layer" },
 ];
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -163,7 +187,7 @@ function SimpleHeader({ showHome, goHome }: { showHome: boolean; goHome: () => v
       <img
         src="/financialfamilies-logo.png"
         alt="FinancialFamilies Logo"
-        className="h-20 md:h-24 w-auto"
+        className="h-20 w-auto md:h-24"
       />
 
       {showHome && (
@@ -204,7 +228,9 @@ function SectionFrame({
         <Panel>
           <PanelBody>
             <div className="max-w-4xl space-y-4">
-              <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">{title}</h1>
+              <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
+                {title}
+              </h1>
               <p className="text-lg leading-relaxed md:text-2xl" style={{ color: brand.slate }}>
                 {subtitle}
               </p>
@@ -217,9 +243,18 @@ function SectionFrame({
   );
 }
 
-function Feature({ title, icon: Icon }: { title: string; icon: React.ComponentType<{ className?: string }> }) {
+function Feature({
+  title,
+  icon: Icon,
+}: {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
   return (
-    <div className="flex items-center gap-3 rounded-[1.5rem] p-4" style={{ background: brand.cream, border: `1px solid ${brand.border}` }}>
+    <div
+      className="flex items-center gap-3 rounded-[1.5rem] p-4"
+      style={{ background: brand.cream, border: `1px solid ${brand.border}` }}
+    >
       <div className="rounded-xl p-2" style={{ background: brand.blueSoft, color: brand.blueDeep }}>
         <Icon className="h-5 w-5" />
       </div>
@@ -230,7 +265,10 @@ function Feature({ title, icon: Icon }: { title: string; icon: React.ComponentTy
 
 function ComparisonRow({ left, right }: { left: string; right: string }) {
   return (
-    <div className="grid grid-cols-1 gap-3 rounded-[1.5rem] p-4 md:grid-cols-2" style={{ background: brand.cream, border: `1px solid ${brand.border}` }}>
+    <div
+      className="grid grid-cols-1 gap-3 rounded-[1.5rem] p-4 md:grid-cols-2"
+      style={{ background: brand.cream, border: `1px solid ${brand.border}` }}
+    >
       <div className="text-sm leading-6 md:text-base" style={{ color: brand.slate }}>
         {left}
       </div>
@@ -243,7 +281,10 @@ function ChoiceCard({ title, subtitle, text, accent, buttonLabel, onButtonClick 
   return (
     <Panel>
       <PanelBody className="space-y-5">
-        <div className="inline-flex rounded-full px-3 py-1 text-sm font-medium" style={{ background: `${accent}15`, color: accent }}>
+        <div
+          className="inline-flex rounded-full px-3 py-1 text-sm font-medium"
+          style={{ background: `${accent}15`, color: accent }}
+        >
           {title}
         </div>
         <div className="text-2xl font-semibold leading-tight md:text-3xl">{subtitle}</div>
@@ -260,13 +301,85 @@ function ChoiceCard({ title, subtitle, text, accent, buttonLabel, onButtonClick 
   );
 }
 
+function AllocationTopicPanel() {
+  return (
+    <div className="mt-6 rounded-[1.5rem] p-6" style={{ background: brand.white, boxShadow: brand.shadow }}>
+      <div className="mb-2 text-lg font-medium">
+        Portfolio design begins with the balance between growth and stability
+      </div>
+      <div className="mb-4 text-2xl font-semibold">Portfolio allocation: stocks and bonds</div>
+
+      <div className="mb-6 grid gap-4 md:grid-cols-2">
+        {allocationBuckets.map((bucket) => (
+          <div key={bucket.label} className="rounded-xl p-5" style={{ background: brand.blueSoft }}>
+            <div className="text-xl font-bold" style={{ color: brand.blueDeep }}>
+              {bucket.label}
+            </div>
+            <div className="mt-1 text-sm" style={{ color: brand.slate }}>
+              {bucket.range}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mb-6 grid gap-6 md:grid-cols-2">
+        <div>
+          <div className="mb-2 font-semibold">Stocks</div>
+          <div className="text-sm leading-6 md:text-base" style={{ color: brand.slate }}>
+            Stocks are expected to deliver most of the portfolio’s long-term growth, but they come with larger year-to-year swings.
+          </div>
+        </div>
+        <div>
+          <div className="mb-2 font-semibold">Bonds</div>
+          <div className="text-sm leading-6 md:text-base" style={{ color: brand.slate }}>
+            Bonds are generally there to reduce volatility, provide stability, and help support spending needs when markets are uncomfortable.
+          </div>
+        </div>
+      </div>
+
+      <div className="mb-4 text-base font-medium">
+        The most important investment decision is often not which fund to buy, but how much of the household portfolio belongs in stocks versus bonds.
+      </div>
+
+      <div className="text-sm md:text-base" style={{ color: brand.slate }}>
+        FinancialFamilies uses planning to determine an allocation that is both growth-oriented and behaviorally tolerable.
+      </div>
+    </div>
+  );
+}
+
 export default function FinancialFamiliesInteractivePresentation() {
   const [current, setCurrent] = useState<SectionKey>("home");
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [showOverview, setShowOverview] = useState(false);
   const overviewRef = useRef<HTMLDivElement | null>(null);
-  const launchPlanUrl = "https://app.rightcapital.com/account/sign-up?referral=1a658ec9-ce93-4f67-bbb7-d065130e2499&type=client&advisor_id=0WrC_Va4q3RKdEwXR82G4Q";
+  const investmentTopicRef = useRef<HTMLDivElement | null>(null);
 
-  const goTo = (key: SectionKey) => setCurrent(key);
+  const launchPlanUrl =
+    "https://app.rightcapital.com/account/sign-up?referral=1a658ec9-ce93-4f67-bbb7-d065130e2499&type=client&advisor_id=0WrC_Va4q3RKdEwXR82G4Q";
+
+  const sectionOrder: SectionKey[] = ["home", "about", "fiduciary", "process", "choice", "investments"];
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const idx = sectionOrder.indexOf(current);
+      if (e.key === "ArrowRight" && idx < sectionOrder.length - 1) {
+        setCurrent(sectionOrder[idx + 1]);
+      }
+      if (e.key === "ArrowLeft" && idx > 0) {
+        setCurrent(sectionOrder[idx - 1]);
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [current]);
+
+  const goTo = (key: SectionKey) => {
+    setCurrent(key);
+    if (key !== "investments") setSelectedTopic(null);
+  };
+
   const goHome = () => setCurrent("home");
 
   const handleOverviewToggle = () => {
@@ -281,6 +394,22 @@ export default function FinancialFamiliesInteractivePresentation() {
     });
   };
 
+  const handleInvestmentTopicClick = (topic: string) => {
+  setSelectedTopic(topic);
+
+  if (topic === "Stocks: how equities drive growth") {
+    window.open("/stocks-franklin-templeton.pdf", "_blank");
+    return;
+  }
+
+  setTimeout(() => {
+    investmentTopicRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 50);
+};
+
   return (
     <Shell>
       <SimpleHeader showHome={current !== "home"} goHome={goHome} />
@@ -288,10 +417,12 @@ export default function FinancialFamiliesInteractivePresentation() {
       {current === "home" && (
         <div className="grid items-stretch gap-6 lg:grid-cols-12">
           <Panel className="overflow-hidden lg:col-span-12">
-            <PanelBody className="space-y-6 pt-20 pb-16 text-center">
+            <PanelBody className="space-y-6 pb-16 pt-20 text-center">
               <div className="space-y-4">
                 <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
-                  Helping loving families<br /><span style={{ color: brand.blue }}>Bring Success Home.</span>
+                  Helping loving families
+                  <br />
+                  <span style={{ color: brand.blue }}>Bring Success Home.</span>
                 </h1>
               </div>
             </PanelBody>
@@ -311,7 +442,7 @@ export default function FinancialFamiliesInteractivePresentation() {
                   key={card.key}
                   type="button"
                   onClick={() => goTo(card.key)}
-                  className="w-full max-w-sm rounded-[2rem] p-6 text-left transition-all duration-200 hover:scale-[1.02] hover:-translate-y-1 md:w-[calc(50%-0.5rem)] xl:w-[calc(33.333%-0.75rem)]"
+                  className="w-full max-w-sm rounded-[2rem] p-6 text-left transition-all duration-200 hover:-translate-y-1 hover:scale-[1.02] md:w-[calc(50%-0.5rem)] xl:w-[calc(33.333%-0.75rem)]"
                   style={{ background: brand.white, boxShadow: brand.shadow }}
                 >
                   <div className="flex items-start gap-4">
@@ -337,9 +468,15 @@ export default function FinancialFamiliesInteractivePresentation() {
           <Panel>
             <PanelBody className="space-y-5 text-base leading-8 md:text-lg">
               <p>FinancialFamilies was launched in 2014 to provide fiduciary, fee-only wealth advice to loving households.</p>
-              <p>Tim Hamilton works directly with every client family. When families call FinancialFamilies, they speak with the person responsible for their planning.</p>
-              <p>The firm focuses on thoughtful financial planning, transparent pricing, and investment management designed to support family goals.</p>
-              <p>A local solo advisory practice is currently referring families to FinancialFamilies. FinancialFamilies will eventually seek to repeat that preferable transition.</p>
+              <p>
+                Tim Hamilton works directly with every client family. When families call FinancialFamilies, they speak with the person responsible for their planning.
+              </p>
+              <p>
+                The firm focuses on thoughtful financial planning, transparent pricing, and investment management designed to support family goals.
+              </p>
+              <p>
+                A local solo advisory practice is currently referring families to FinancialFamilies. FinancialFamilies will eventually seek to repeat that preferable transition.
+              </p>
 
               <div className="grid gap-4 pt-2 md:grid-cols-2">
                 <Feature title="MBA from Ohio State" icon={Briefcase} />
@@ -387,7 +524,9 @@ export default function FinancialFamiliesInteractivePresentation() {
               <PanelBody className="space-y-5">
                 <div className="text-2xl font-semibold">What fee-only means here</div>
                 <div className="space-y-4 text-base leading-8 md:text-lg">
-                  <p>FinancialFamilies does not accept compensation from financial institutions and instead uses transparent pricing intended to align with client interests and fiduciary duty.</p>
+                  <p>
+                    FinancialFamilies does not accept compensation from financial institutions and instead uses transparent pricing intended to align with client interests and fiduciary duty.
+                  </p>
                   <p>No product revenue. No proprietary product shelf. No pressure to fit families into someone else’s agenda.</p>
                   <p>The structure is designed so advice can stand on its own merits.</p>
                 </div>
@@ -417,7 +556,11 @@ export default function FinancialFamiliesInteractivePresentation() {
               <div className="mb-4 text-2xl font-semibold">Typical first 60 days</div>
               <div className="grid gap-4 md:grid-cols-5">
                 {first60DayTimeline.map((step) => (
-                  <div key={step.label} className="rounded-[1.5rem] p-4 text-center" style={{ background: brand.cream, border: `1px solid ${brand.border}` }}>
+                  <div
+                    key={step.label}
+                    className="rounded-[1.5rem] p-4 text-center"
+                    style={{ background: brand.cream, border: `1px solid ${brand.border}` }}
+                  >
                     <div className="text-sm font-semibold" style={{ color: brand.blueDeep }}>
                       {step.week}
                     </div>
@@ -433,8 +576,15 @@ export default function FinancialFamiliesInteractivePresentation() {
               <div className="text-2xl font-semibold">How new client work tends to flow</div>
               <div className="space-y-4">
                 {processDetails.map((step, index) => (
-                  <div key={step} className="flex items-start gap-4 rounded-[1.5rem] p-4" style={{ background: brand.cream, border: `1px solid ${brand.border}` }}>
-                    <div className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full font-semibold" style={{ background: brand.blue, color: brand.white }}>
+                  <div
+                    key={step}
+                    className="flex items-start gap-4 rounded-[1.5rem] p-4"
+                    style={{ background: brand.cream, border: `1px solid ${brand.border}` }}
+                  >
+                    <div
+                      className="flex h-10 w-10 min-h-10 min-w-10 shrink-0 items-center justify-center rounded-full font-semibold"
+                      style={{ background: brand.blue, color: brand.white }}
+                    >
                       {index + 1}
                     </div>
                     <div className="text-base leading-7 md:text-lg">{step}</div>
@@ -447,10 +597,7 @@ export default function FinancialFamiliesInteractivePresentation() {
       )}
 
       {current === "choice" && (
-        <SectionFrame
-          title="Choose Your Path"
-          subtitle="Families can begin building a plan or explore at their own pace."
-        >
+        <SectionFrame title="Choose Your Path" subtitle="Families can begin building a plan or explore at their own pace.">
           <div className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
               <ChoiceCard
@@ -484,14 +631,36 @@ export default function FinancialFamiliesInteractivePresentation() {
 
                     <div className="grid gap-4 md:grid-cols-2">
                       {[
-                        ["Retirement Planning", "Clarify whether your retirement resources are truly on track and grounded in planning rather than wishful thinking."],
-                        ["Insurance Review", "FinancialFamilies does not sell insurance products, which helps families get a straight answer about what coverage is truly needed."],
-                        ["Tax Planning", "Good planning often means choosing among several possible paths with a clear understanding of the tax consequences."],
-                        ["Budgeting", "Saving and spending both matter. Families need a plan that supports long-term goals without losing sight of real life."],
-                        ["Estate Planning Coordination", "While legal documents are drafted elsewhere, FinancialFamilies helps families stay organized, aligned, and current over time."],
-                        ["Life Planning", "Whether life brings a new job, a move, stock options, pension decisions, or a major purchase, planning helps families make decisions with clarity."],
+                        [
+                          "Retirement Planning",
+                          "Clarify whether your retirement resources are truly on track and grounded in planning rather than wishful thinking.",
+                        ],
+                        [
+                          "Insurance Review",
+                          "FinancialFamilies does not sell insurance products, which helps families get a straight answer about what coverage is truly needed.",
+                        ],
+                        [
+                          "Tax Planning",
+                          "Good planning often means choosing among several possible paths with a clear understanding of the tax consequences.",
+                        ],
+                        [
+                          "Budgeting",
+                          "Saving and spending both matter. Families need a plan that supports long-term goals without losing sight of real life.",
+                        ],
+                        [
+                          "Estate Planning Coordination",
+                          "While legal documents are drafted elsewhere, FinancialFamilies helps families stay organized, aligned, and current over time.",
+                        ],
+                        [
+                          "Life Planning",
+                          "Whether life brings a new job, a move, stock options, pension decisions, or a major purchase, planning helps families make decisions with clarity.",
+                        ],
                       ].map(([title, text]) => (
-                        <div key={title} className="rounded-[1.5rem] p-5" style={{ background: brand.cream, border: `1px solid ${brand.border}` }}>
+                        <div
+                          key={title}
+                          className="rounded-[1.5rem] p-5"
+                          style={{ background: brand.cream, border: `1px solid ${brand.border}` }}
+                        >
                           <div className="mb-2 text-lg font-semibold">{title}</div>
                           <p className="text-base leading-7" style={{ color: brand.slate }}>
                             {text}
@@ -509,35 +678,50 @@ export default function FinancialFamiliesInteractivePresentation() {
 
       {current === "investments" && (
         <SectionFrame
-          title="Investment Management Approach"
-          subtitle="Investments are structured to support family goals, stability, and long-term progress."
+          title="Investment Approach"
+          subtitle="Explore the principles behind how FinancialFamilies constructs and manages portfolios."
         >
-          <div className="grid gap-6 lg:grid-cols-12">
-            <Panel className="lg:col-span-8">
-              <PanelBody className="space-y-4">
-                <div className="text-2xl font-semibold">Investment management principles</div>
-                <div className="space-y-4">
-                  {investmentPoints.map((point) => (
-                    <div key={point} className="flex items-start gap-4 rounded-[1.5rem] p-4" style={{ background: brand.cream, border: `1px solid ${brand.border}` }}>
-                      <CheckCircle2 className="mt-1 h-5 w-5 min-h-5 min-w-5 shrink-0" style={{ color: brand.blueDeep }} />
-                      <div className="text-base leading-7 md:text-lg">{point}</div>
-                    </div>
-                  ))}
-                </div>
-              </PanelBody>
-            </Panel>
+          <Panel>
+            <PanelBody>
+             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {investmentTopics.map((topic) => {
+        const isActive = selectedTopic === topic;
 
-            <Panel className="lg:col-span-4">
-              <PanelBody className="space-y-5 text-base leading-8 md:text-lg">
-                <div className="text-2xl font-semibold">Bottom line</div>
-                <p>Planning informs investing.</p>
-                <p>Taxes matter.</p>
-                <p>Behavior matters.</p>
-                <p>Costs matter.</p>
-                <p>The portfolio is there to support the life, not the other way around.</p>
-              </PanelBody>
-            </Panel>
-          </div>
+        return (
+          <AppButton
+            key={topic}
+            onClick={() => handleInvestmentTopicClick(topic)}
+            style={{
+              background: isActive ? brand.orangeSoft : brand.blueSoft,
+              color: isActive ? brand.orangeDeep : brand.blueDeep,
+              border: `1px solid ${brand.border}`,
+              boxShadow: brand.shadow,
+              transform: isActive ? "scale(1.02)" : "scale(1)",
+              transition: "all 0.15s ease",
+            }}
+          >
+            {topic}
+          </AppButton>
+        );
+      })}
+    </div>
+
+              <div ref={investmentTopicRef}>
+                {selectedTopic === "Portfolio allocation: stocks and bonds" && <AllocationTopicPanel />}
+                {selectedTopic === "Expense ratios: cost discipline" && <ExpenseTopicPanel brand={brand} />}
+                {selectedTopic === "Stock diversification" && <StockDiversificationPanel brand={brand} />}
+                {selectedTopic === "Volatility: how markets move" && <VolatilityTopicPanel brand={brand} />}
+                {selectedTopic === "Rebalancing: shifting from recent winners to recent laggards" && (
+                  <RebalancingTopicPanel brand={brand} />)}
+		{selectedTopic === "Bonds: stability and income" && (<BondsTopicPanel brand={brand} />)}
+		{selectedTopic === "Bond diversification" && (<BondDiversificationPanel brand={brand} />)}
+		{selectedTopic === "Asset location: placing investments in the right accounts" && (<AssetLocationTopicPanel brand={brand}  		/>)}
+		{selectedTopic === "Tax-loss harvesting" && (<TaxLossHarvestingPanel brand={brand} />)}
+		{selectedTopic === "Spending: investing to support life goals" && (<SpendingTopicPanel brand={brand} />)}
+		{selectedTopic === "Altruist custodial platform" && (<AltruistTopicPanel brand={brand} />)}
+              </div>
+            </PanelBody>
+          </Panel>
         </SectionFrame>
       )}
     </Shell>
