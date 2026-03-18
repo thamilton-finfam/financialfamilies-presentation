@@ -527,8 +527,8 @@ export default function FinancialFamiliesInteractivePresentation() {
                   <p>
                     FinancialFamilies does not accept compensation from financial institutions and instead uses transparent pricing intended to align with client interests and fiduciary duty.
                   </p>
-                  <p>No product revenue. No proprietary product shelf. No pressure to fit families into someone else’s agenda.</p>
-                  <p>The structure is designed so advice can stand on its own merits.</p>
+                  <p>No product revenue. No pressure to fit families into someone else’s agenda.</p>
+                  <p>The structure is designed so advice stands on its own merits.</p>
                 </div>
               </PanelBody>
             </Panel>
@@ -653,7 +653,7 @@ export default function FinancialFamiliesInteractivePresentation() {
                         ],
                         [
                           "Life Planning",
-                          "Whether life brings a new job, a move, stock options, pension decisions, or a major purchase, planning helps families make decisions with clarity.",
+                          "Whether life brings a new job, a move, stock options, pension decisions, or a major purchase, planning helps families make a wide range of decisions with clarity.",
                         ],
                       ].map(([title, text]) => (
                         <div

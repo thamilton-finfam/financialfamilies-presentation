@@ -16,11 +16,11 @@ type Brand = {
 const locationBuckets = [
   {
     title: "Roth IRAs",
-    text: "Roth accounts are often a strong location for stocks and higher-growth assets because future qualified growth and withdrawals can be tax-free.",
+    text: "Roth accounts are often a strong location for stocks and higher-growth assets because withdrawals can be tax-free.",
   },
   {
     title: "Traditional IRAs",
-    text: "Traditional IRAs are often a natural home for bonds, where ordinary income treatment is less problematic and the account can help stabilize the portfolio.",
+    text: "Traditional IRAs are often a natural home for bonds, where ordinary income treatment is less problematic and withdrawals are treated as taxable income.",
   },
   {
     title: "Taxable Accounts",

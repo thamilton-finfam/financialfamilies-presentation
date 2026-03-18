@@ -55,7 +55,7 @@ export default function AltruistTopicPanel({ brand }: { brand: Brand }) {
           <div className="mb-2 font-semibold">How they are compensated</div>
           <div className="text-sm leading-6 md:text-base" style={{ color: brand.slate }}>
             FinancialFamilies does not pay Altruist and Altruist does not pay FinancialFamilies.
-            Like other custodians, they are compensated for holding client accounts.
+            Like other custodians, they are compensated by holding client accounts.
           </div>
         </div>
       </div>
@@ -66,21 +66,21 @@ export default function AltruistTopicPanel({ brand }: { brand: Brand }) {
           <div className="mb-2 font-semibold">What clients experience</div>
           <div className="text-sm leading-6 md:text-base" style={{ color: brand.slate }}>
             Altruist supports account setup, transfers, trading, and performance reporting.
-            They also provide responsive service for both clients and advisors.
+            They also provide highly responsive service.
           </div>
         </div>
         <div>
           <div className="mb-2 font-semibold">How they fit in the industry</div>
           <div className="text-sm leading-6 md:text-base" style={{ color: brand.slate }}>
-            They are competing with firms like Schwab and Fidelity, but focus exclusively
-            on advisor-supported relationships rather than retail accounts. Account transfers are efficient and do not trigger taxation. 
+            They are competing with firms like Schwab and Fidelity by focusing exclusively
+            on helping advisors help their clients. Account transfers are efficient and do not trigger taxation. 
           </div>
         </div>
       </div>
 
       {/* Closing */}
       <div className="text-base font-medium">
-        The goal is simple: make implementation easy while keeping advice independent.
+        The goal is simple: make implementation and ongoing administration easy while keeping advice independent.
       </div>
     </div>
   );

@@ -85,7 +85,7 @@ export default function SpendingTopicPanel({ brand }: { brand: Brand }) {
         <div>
           <div className="mb-2 font-semibold">How FinancialFamilies approaches it</div>
           <div className="text-sm leading-6 md:text-base" style={{ color: brand.slate }}>
-            Planning helps determine how much the portfolio may need to contribute, when
+            Planning helps determine how much of the portfolio may be needed, when
             withdrawals should begin, and which account types may be most appropriate to draw
             from along the way.
           </div>
