@@ -724,6 +724,27 @@ export default function FinancialFamiliesInteractivePresentation() {
           </Panel>
         </SectionFrame>
       )}
-    </Shell>
+  <div
+  className="mt-12 rounded-[1.5rem] p-6 text-xs leading-6 md:text-sm"
+  style={{
+    background: brand.cream,
+    color: brand.slate,
+    border: `1px solid ${brand.border}`,
+  }}
+><div className="mb-2 font-semibold">Important Disclosures</div>
+  <p className="mb-4">
+    Investing in securities involves risks, including the potential for loss of principal.
+    There is no guarantee that any investment plan or strategy will be successful.
+  </p>
+
+  <p className="mb-4">
+    FinancialFamilies, LLC (“FinancialFamilies”) is a registered investment adviser offering advisory services in the State of Ohio and in other jurisdictions where exempted. Registration does not imply a certain level of skill or training. The presence of this website on the Internet shall not be directly or indirectly interpreted as a solicitation of investment advisory services to persons of another jurisdiction unless otherwise permitted by statute. Follow-up or individualized responses to consumers in a particular state by FinancialFamilies in the rendering of personalized investment advice for compensation shall not be made without our first complying with jurisdiction requirements or pursuant an applicable state exemption.
+  </p>
+
+  <p>
+    All written content on this site is for information purposes only. Opinions expressed herein are solely those of FinancialFamilies, unless otherwise specifically cited. Material presented is believed to be from reliable sources and no representations are made by our firm as to another parties’ informational accuracy or completeness. All information or ideas provided should be discussed in detail with an advisor, accountant or legal counsel prior to implementation.
+  </p>
+</div>
+</Shell>
   );
 }
