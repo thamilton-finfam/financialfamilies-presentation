@@ -25,7 +25,6 @@ import TaxLossHarvestingPanel from "@/Components/Presentation/TaxLossHarvestingP
 import SpendingTopicPanel from "@/Components/Presentation/SpendingTopicPanel";
 import AltruistTopicPanel from "@/Components/Presentation/AltruistTopicPanel";
 
-
 type SectionKey = "home" | "about" | "fiduciary" | "process" | "choice" | "investments";
 
 type NavCard = {
@@ -103,8 +102,8 @@ const first60DayTimeline = [
 const processDetails = [
   "After the introduction meeting, families receive a short list of data-gathering requests tailored to their situation.",
   "Documents are uploaded to a secure vault or delivered directly.",
-  "Once documents are provided, a Resources Verification & Goals Exploration meeting is scheduled. Families do not need to commit to FinancialFamilies before this meeting.",
-  "About four weeks later, a full planning meeting explores planning scenarios, investment recommendations, and implementation.",
+  "Once documents are provided, a Resources Verification & Goals Exploration meeting is scheduled. Families generally commit to FinancialFamilies at that next meeting.",
+  "About four weeks later, we thoroughly explore a wide range of planning topics, investment recommendations, and implementation.",
   "After implementation begins, clients have year-round access via in-person meetings, virtual meetings, email, or phone. Most families become accustomed to ready availability and prefer two meetings per year. At least one formal annual meeting is requested.",
 ];
 
@@ -138,7 +137,9 @@ function Shell({ children }: { children: React.ReactNode }) {
         color: brand.ink,
       }}
     >
-      <div className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8">{children}</div>
+      <div className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8">
+  {children}
+</div>
     </div>
   );
 }
@@ -180,32 +181,60 @@ function AppButton({
     </button>
   );
 }
-
-function SimpleHeader({ showHome, goHome }: { showHome: boolean; goHome: () => void }) {
+function ReturnToTopics({
+  onClick,
+}: {
+  onClick: () => void;
+}) {
   return (
-    <div className="relative mb-8 flex items-center justify-center">
-      <img
-        src="/financialfamilies-logo.png"
-        alt="FinancialFamilies Logo"
-        className="h-20 w-auto md:h-24"
-      />
-
-      {showHome && (
-        <div className="absolute right-0">
-          <AppButton
-            onClick={goHome}
-            className="flex items-center"
-            style={{ background: brand.white, boxShadow: brand.shadow, color: brand.ink }}
-          >
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </AppButton>
-        </div>
-      )}
+    <div className="mt-8 flex justify-center">
+      <AppButton
+        onClick={onClick}
+        style={{
+          background: brand.white,
+          color: brand.blueDeep,
+          border: `1px solid ${brand.border}`,
+          boxShadow: brand.shadow,
+        }}
+      >
+        Return to topics
+      </AppButton>
     </div>
   );
 }
 
+function SimpleHeader({ showHome, goHome }: { showHome: boolean; goHome: () => void }) {
+  return (
+    <div
+      className="sticky top-0 z-50 mb-8 rounded-[1.5rem] px-4 py-3"
+      style={{
+  background: brand.cream,
+  boxShadow: "0 8px 24px rgba(14, 34, 48, 0.08)",
+}}
+    >
+      <div className="relative flex items-center justify-center">
+        <img
+          src="/financialfamilies-logo.png"
+          alt="FinancialFamilies Logo"
+          className="h-20 w-auto md:h-24"
+        />
+
+        {showHome && (
+          <div className="absolute right-0">
+            <AppButton
+              onClick={goHome}
+              className="flex items-center"
+              style={{ background: brand.white, boxShadow: brand.shadow, color: brand.ink }}
+            >
+              <Home className="mr-2 h-4 w-4" />
+              Home
+            </AppButton>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 function SectionFrame({
   title,
   subtitle,
@@ -351,9 +380,14 @@ function AllocationTopicPanel() {
 export default function FinancialFamiliesInteractivePresentation() {
   const [current, setCurrent] = useState<SectionKey>("home");
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [lastSelectedTopic, setLastSelectedTopic] = useState<string | null>(null);
   const [showOverview, setShowOverview] = useState(false);
   const overviewRef = useRef<HTMLDivElement | null>(null);
-  const investmentTopicRef = useRef<HTMLDivElement | null>(null);
+useEffect(() => {
+  window.scrollTo({ top: 0, behavior: "auto" });
+}, [current]);
+const investmentSectionTopRef = useRef<HTMLDivElement | null>(null);
+const investmentTopicRef = useRef<HTMLDivElement | null>(null);
 
   const launchPlanUrl =
     "https://app.rightcapital.com/account/sign-up?referral=1a658ec9-ce93-4f67-bbb7-d065130e2499&type=client&advisor_id=0WrC_Va4q3RKdEwXR82G4Q";
@@ -376,36 +410,52 @@ export default function FinancialFamiliesInteractivePresentation() {
   }, [current]);
 
   const goTo = (key: SectionKey) => {
-    setCurrent(key);
-    if (key !== "investments") setSelectedTopic(null);
-  };
+  setCurrent(key);
+  if (key !== "investments") {
+    setSelectedTopic(null);
+    setLastSelectedTopic(null);
+  }
+};
 
-  const goHome = () => setCurrent("home");
+  const goHome = () => {
+  setCurrent("home");
+  setSelectedTopic(null);
+  setLastSelectedTopic(null);
+};
 
   const handleOverviewToggle = () => {
     setShowOverview((prev) => {
       const next = !prev;
       if (!prev) {
-        setTimeout(() => {
-          overviewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 50);
-      }
+  setTimeout(() => {
+    const y =
+      (overviewRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      120;
+
+    window.scrollTo({
+      top: y,
+      behavior: "smooth",
+    });
+  }, 50);
+}
       return next;
     });
   };
 
   const handleInvestmentTopicClick = (topic: string) => {
   setSelectedTopic(topic);
-
-  if (topic === "Stocks: how equities drive growth") {
-    window.open("/stocks-franklin-templeton.pdf", "_blank");
-    return;
-  }
+  setLastSelectedTopic(topic);
 
   setTimeout(() => {
-    investmentTopicRef.current?.scrollIntoView({
+    const y =
+      (investmentTopicRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      120;
+
+    window.scrollTo({
+      top: Math.max(0, y),
       behavior: "smooth",
-      block: "start",
     });
   }, 50);
 };
@@ -428,11 +478,14 @@ export default function FinancialFamiliesInteractivePresentation() {
             </PanelBody>
           </Panel>
 
-          <div className="px-2 pb-1 pt-2 lg:col-span-12">
-            <h2 className="text-xl font-semibold md:text-2xl" style={{ color: brand.ink }}>
-              What would you like to explore today?
-            </h2>
-          </div>
+          <div className="px-2 pb-2 pt-4 text-center lg:col-span-12">
+  <h2
+    className="text-xl font-semibold md:text-2xl"
+    style={{ color: brand.ink }}
+  >
+    What would you like to explore today?
+  </h2>
+</div>
 
           <div className="flex flex-wrap justify-center gap-4 lg:col-span-12">
             {navCards.map((card) => {
@@ -464,30 +517,103 @@ export default function FinancialFamiliesInteractivePresentation() {
       )}
 
       {current === "about" && (
-        <SectionFrame title="About Tim Hamilton" subtitle="A little about the person and values behind FinancialFamilies.">
-          <Panel>
-            <PanelBody className="space-y-5 text-base leading-8 md:text-lg">
-              <p>FinancialFamilies was launched in 2014 to provide fiduciary, fee-only wealth advice to loving households.</p>
-              <p>
-                Tim Hamilton works directly with every client family. When families call FinancialFamilies, they speak with the person responsible for their planning.
-              </p>
-              <p>
-                The firm focuses on thoughtful financial planning, transparent pricing, and investment management designed to support family goals.
-              </p>
-              <p>
-                Many families come to FinancialFamilies after experiencing a more transactional or product-driven advisory relationship.
-              </p>
+  <SectionFrame
+    title="About Tim Hamilton"
+    subtitle="FinancialFamilies was built to be the kind of place I would trust with my own family."
+  >
+    <Panel>
+      <PanelBody className="grid gap-10 md:grid-cols-2 items-start">
 
-              <div className="grid gap-4 pt-2 md:grid-cols-2">
-                <Feature title="MBA from Ohio State" icon={Briefcase} />
-                <Feature title="CFP® Practitioner" icon={CheckCircle2} />
-                <Feature title="NAPFA Member" icon={ShieldCheck} />
-                <Feature title="Independent Firm Owner" icon={HeartHandshake} />
-              </div>
-            </PanelBody>
-          </Panel>
-        </SectionFrame>
-      )}
+        {/* LEFT SIDE — TEXT */}
+        <div className="space-y-5 text-base leading-8 md:text-lg">
+
+  <p className="text-lg font-medium">
+   
+    FinancialFamilies was launched in 2014 to provide fiduciary, fee-only financial advice
+    to families who want clarity, not confusion.
+  </p>
+
+  <p>
+    When you work with FinancialFamilies, you work directly with me. When you call,
+    you’re not routed through a system or handed off — you’re talking to the person
+    responsible for your plan.
+  </p>
+
+  <p>
+    The work focuses on practical planning, transparent pricing, and investment decisions
+    that support real life — not product sales or unnecessary complexity.
+  </p>
+
+  <p>
+    Many families come here after experiencing advice that felt transactional,
+    rushed, or disconnected. This is meant to be the opposite of that.
+  </p>
+
+  <p>
+    The goal is simple: help families make clear decisions, stay organized,
+    and move forward with confidence.
+  </p>
+
+  <div className="space-y-3 pt-2">
+  <div className="flex justify-center">
+    <Feature title="NAPFA Member" icon={ShieldCheck} />
+  </div>
+  <div className="flex justify-center">
+    <Feature title="CFP® Practitioner" icon={CheckCircle2} />
+  </div>
+  <div className="flex justify-center">
+    <Feature title="MBA from Ohio State" icon={Briefcase} />
+  </div>
+  <div className="flex justify-center">
+    <Feature title="Independent Firm Owner" icon={HeartHandshake} />
+  </div>
+</div>
+</div>
+
+        {/* RIGHT SIDE — IMAGES */}
+        <div className="space-y-4">
+  {/* Headshot */}
+  <div className="overflow-hidden rounded-3xl">
+    <img
+      src="/images/tim-headshot.jpg"
+      alt="Tim Hamilton"
+      className="w-full h-auto object-cover"
+    />
+  </div>
+
+  {/* Family photo on its own row */}
+  <div className="overflow-hidden rounded-2xl">
+    <img
+      src="/images/family.jpg"
+      alt="Tim with family"
+      className="w-full h-auto object-cover"
+    />
+  </div>
+
+  {/* Office + front door below */}
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+  <div className="overflow-hidden rounded-2xl self-start">
+    <img
+      src="/images/office.jpg"
+      alt="Office meeting space"
+      className="w-full h-auto object-cover"
+    />
+  </div>
+
+  <div className="overflow-hidden rounded-2xl self-start">
+    <img
+      src="/images/front-door.jpg"
+      alt="Welcome home"
+      className="w-full h-auto object-cover"
+    />
+  </div>
+</div>
+</div>
+
+      </PanelBody>
+    </Panel>
+  </SectionFrame>
+)}
 
       {current === "fiduciary" && (
         <SectionFrame
@@ -496,12 +622,15 @@ export default function FinancialFamiliesInteractivePresentation() {
         >
           <Panel>
             <PanelBody>
-              <div className="mb-4 space-y-2">
-                <div className="text-base md:text-lg" style={{ color: brand.slate }}>
-                  Families pay a simple flat annual planning fee rather than a percentage of assets.
-                </div>
-                <div className="text-2xl font-semibold">FinancialFamilies Fee Structure</div>
-              </div>
+              <div className="mb-4 space-y-3">
+  <div className="text-lg md:text-xl font-medium">
+    You pay a clear annual fee — not a percentage of your investments.
+  </div>
+  <div className="text-base md:text-lg" style={{ color: brand.slate }}>
+    That keeps advice focused on what’s best for your family, not on gathering or managing assets.
+  </div>
+  <div className="text-2xl font-semibold pt-2">FinancialFamilies Fee Structure</div>
+</div>
               <div className="overflow-hidden rounded-[1.25rem] border" style={{ borderColor: brand.border }}>
                 <div className="grid grid-cols-2 text-center font-semibold" style={{ background: brand.blueDeep, color: brand.white }}>
                   <div className="p-3">Net Worth</div>
@@ -522,24 +651,48 @@ export default function FinancialFamiliesInteractivePresentation() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Panel>
               <PanelBody className="space-y-5">
-                <div className="text-2xl font-semibold">What fee-only means here</div>
-                <div className="space-y-4 text-base leading-8 md:text-lg">
-                  <p>
-                    FinancialFamilies does not accept compensation from financial institutions and instead uses transparent pricing intended to align with client interests and fiduciary duty.
-                  </p>
-                  <p>No product revenue. No pressure to fit families into someone else’s agenda.</p>
-                  <p>The structure is designed so advice stands on its own merits.</p>
-                </div>
+                <div className="text-2xl font-semibold">What fee-only means</div>
+<div className="space-y-4 text-base leading-8 md:text-lg">
+  <p>
+    FinancialFamilies is paid directly by the families it serves. There is no
+    compensation from financial products, commissions, or outside incentives.
+  </p>
+  <p>
+    That means recommendations don’t depend on what you buy, where you invest,
+    or how your assets are managed.
+  </p>
+  <p>
+    The advice stands on its own — simple, direct, and aligned with your goals.
+  </p>
+</div>
               </PanelBody>
             </Panel>
 
             <Panel>
               <PanelBody className="space-y-4">
-                <div className="text-2xl font-semibold">Why that matters</div>
-                <ComparisonRow left="Commissions can bias recommendations" right="Fee-only removes product compensation" />
-                <ComparisonRow left="AUM pricing can create asset-gathering incentives" right="Flat-fee pricing reduces those conflicts" />
-                <ComparisonRow left="Fee-based is often misunderstood" right="Fee-only is cleaner and easier to evaluate" />
-                <ComparisonRow left="Advice can become sales-adjacent" right="Advice stays closer to planning and stewardship" />
+                <div className="text-2xl font-semibold">Why families care</div>
+<div className="text-base md:text-lg" style={{ color: brand.slate }}>
+  Different compensation models can quietly influence advice. This structure is designed to remove that pressure.
+</div>
+                <ComparisonRow
+  left="Some advisors are paid through commissions"
+  right="You receive advice without product incentives"
+/>
+
+<ComparisonRow
+  left="Asset-based fees can reward gathering more assets"
+  right="Your fee doesn’t depend on how much you invest"
+/>
+
+<ComparisonRow
+  left="Compensation structures aren’t always obvious"
+  right="You know exactly how FinancialFamilies is paid"
+/>
+
+<ComparisonRow
+  left="Advice can drift toward sales over time"
+  right="The focus stays on planning and long-term decisions"
+/>
               </PanelBody>
             </Panel>
           </div>
@@ -597,26 +750,27 @@ export default function FinancialFamiliesInteractivePresentation() {
       )}
 
       {current === "choice" && (
-        <SectionFrame title="Choose Your Path" subtitle="Families can begin building a plan or explore at their own pace.">
-          <div className="space-y-6">
+  <SectionFrame title="Choose Your Path" subtitle="Families can start with an overview and launch when they are ready!">
+       <div className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
-              <ChoiceCard
-                title="Option 1"
-                subtitle="Begin building a plan"
-                text="Start organizing your goals, accounts, and financial structure inside professional planning software to begin building a real financial plan together."
-                accent={brand.blue}
-                buttonLabel="Launch Plan"
-                onButtonClick={() => window.open(launchPlanUrl, "_blank")}
-              />
-              <ChoiceCard
-                title="Option 2"
-                subtitle="Stay at the overview level"
-                text="Continue learning about the process and philosophy first. Many families prefer to explore before committing to the planning process."
-                accent={brand.orange}
-                buttonLabel="Planning Overview"
-                onButtonClick={handleOverviewToggle}
-              />
-            </div>
+  <ChoiceCard
+    title="Overview"
+    subtitle="Start with the overview"
+    text="We'll cover a world of topics together. Money matters."
+    accent={brand.orange}
+    buttonLabel="Planning Overview"
+    onButtonClick={handleOverviewToggle}
+  />
+
+  <ChoiceCard
+    title="Launch"
+    subtitle="Launch your plan"
+    text="Begin organizing your resources and goals so a real plan can start taking shape."
+    accent={brand.blue}
+    buttonLabel="Launch Plan"
+    onButtonClick={() => window.open(launchPlanUrl, "_blank")}
+  />
+</div>
 
             {showOverview && (
               <div ref={overviewRef}>
@@ -644,8 +798,8 @@ export default function FinancialFamiliesInteractivePresentation() {
                           "Good planning often means choosing among several possible paths with a clear understanding of the tax consequences.",
                         ],
                         [
-                          "Budgeting",
-                          "Saving and spending both matter. Families need a plan that supports long-term goals without losing sight of real life.",
+                          "Health and Long-Term Care Planning",
+                          "Families need a plan that supports long-term health goals and informs proper utilization of resources.",
                         ],
                         [
                           "Estate Planning Coordination",
@@ -653,7 +807,7 @@ export default function FinancialFamiliesInteractivePresentation() {
                         ],
                         [
                           "Life Planning",
-                          "Whether life brings a new job, a move, stock options, pension decisions, or a major purchase, planning helps families make a wide range of decisions with clarity.",
+                          "Whether life brings a new job, an inheritance, a growing family, or endless other possibilities, families make decisions with clarity.",
                         ],
                       ].map(([title, text]) => (
                         <div
@@ -669,7 +823,29 @@ export default function FinancialFamiliesInteractivePresentation() {
                       ))}
                     </div>
                   </PanelBody>
-                </Panel>
+                                </Panel>
+
+                <div className="mt-8 flex justify-center">
+                  <AppButton
+                    onClick={() => {
+  setShowOverview(false);
+  setTimeout(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+                    style={{
+                      background: brand.white,
+                      color: brand.blueDeep,
+                      border: `1px solid ${brand.border}`,
+                      boxShadow: brand.shadow,
+                    }}
+                  >
+                    Return to Choose Your Path
+                  </AppButton>
+                </div>
               </div>
             )}
           </div>
@@ -683,9 +859,31 @@ export default function FinancialFamiliesInteractivePresentation() {
         >
           <Panel>
             <PanelBody>
-             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {investmentTopics.map((topic) => {
-        const isActive = selectedTopic === topic;
+<div ref={investmentSectionTopRef} />
+             <div className="space-y-8">
+
+  {/* Foundations */}
+  <div>
+    <div className="mb-4 flex items-center justify-center">
+  <div
+    className="rounded-full px-4 py-1.5 text-sm font-semibold tracking-wide"
+    style={{
+      background: brand.blueSoft,
+      color: brand.blueDeep,
+    }}
+  >
+    Foundations
+  </div>
+</div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {[
+        "Portfolio allocation: stocks and bonds",
+        "Stocks: how equities drive growth",
+        "Bonds: stability and income",
+      ].map((topic) => {
+         const isActive =
+    selectedTopic === topic ||
+    (selectedTopic === null && lastSelectedTopic === topic);
 
         return (
           <AppButton
@@ -696,8 +894,6 @@ export default function FinancialFamiliesInteractivePresentation() {
               color: isActive ? brand.orangeDeep : brand.blueDeep,
               border: `1px solid ${brand.border}`,
               boxShadow: brand.shadow,
-              transform: isActive ? "scale(1.02)" : "scale(1)",
-              transition: "all 0.15s ease",
             }}
           >
             {topic}
@@ -705,21 +901,379 @@ export default function FinancialFamiliesInteractivePresentation() {
         );
       })}
     </div>
+  </div>
 
-              <div ref={investmentTopicRef}>
-                {selectedTopic === "Portfolio allocation: stocks and bonds" && <AllocationTopicPanel />}
-                {selectedTopic === "Expense ratios: cost discipline" && <ExpenseTopicPanel brand={brand} />}
-                {selectedTopic === "Stock diversification" && <StockDiversificationPanel brand={brand} />}
-                {selectedTopic === "Volatility: how markets move" && <VolatilityTopicPanel brand={brand} />}
-                {selectedTopic === "Rebalancing: shifting from recent winners to recent laggards" && (
-                  <RebalancingTopicPanel brand={brand} />)}
-		{selectedTopic === "Bonds: stability and income" && (<BondsTopicPanel brand={brand} />)}
-		{selectedTopic === "Bond diversification" && (<BondDiversificationPanel brand={brand} />)}
-		{selectedTopic === "Asset location: placing investments in the right accounts" && (<AssetLocationTopicPanel brand={brand}  		/>)}
-		{selectedTopic === "Tax-loss harvesting" && (<TaxLossHarvestingPanel brand={brand} />)}
-		{selectedTopic === "Spending: investing to support life goals" && (<SpendingTopicPanel brand={brand} />)}
-		{selectedTopic === "Altruist custodial platform" && (<AltruistTopicPanel brand={brand} />)}
-              </div>
+  {/* Portfolio Construction */}
+  <div>
+    <div className="mb-4 flex items-center justify-center">
+  <div
+    className="rounded-full px-4 py-1.5 text-sm font-semibold tracking-wide"
+    style={{
+      background: brand.blueSoft,
+      color: brand.blueDeep,
+    }}
+  >
+    Portfolio Construction
+  </div>
+</div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {[
+        "Stock diversification",
+        "Bond diversification",
+        "Asset location: placing investments in the right accounts",
+      ].map((topic) => {
+          const isActive =
+    selectedTopic === topic ||
+    (selectedTopic === null && lastSelectedTopic === topic);
+
+        return (
+          <AppButton
+            key={topic}
+            onClick={() => handleInvestmentTopicClick(topic)}
+            style={{
+              background: isActive ? brand.orangeSoft : brand.blueSoft,
+              color: isActive ? brand.orangeDeep : brand.blueDeep,
+              border: `1px solid ${brand.border}`,
+              boxShadow: brand.shadow,
+            }}
+          >
+            {topic}
+          </AppButton>
+        );
+      })}
+    </div>
+  </div>
+
+  {/* Ongoing Management */}
+  <div>
+    <div className="mb-4 flex items-center justify-center">
+  <div
+    className="rounded-full px-4 py-1.5 text-sm font-semibold tracking-wide"
+    style={{
+      background: brand.blueSoft,
+      color: brand.blueDeep,
+    }}
+  >
+    Ongoing Management
+  </div>
+</div>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {[
+        "Expense ratios: cost discipline",
+        "Volatility: how markets move",
+        "Rebalancing: shifting from recent winners to recent laggards",
+        "Tax-loss harvesting",
+        "Spending: investing to support life goals",
+        "Altruist custodial platform",
+      ].map((topic) => {
+          const isActive =
+    selectedTopic === topic ||
+    (selectedTopic === null && lastSelectedTopic === topic);
+
+        return (
+          <AppButton
+            key={topic}
+            onClick={() => handleInvestmentTopicClick(topic)}
+            style={{
+              background: isActive ? brand.orangeSoft : brand.blueSoft,
+              color: isActive ? brand.orangeDeep : brand.blueDeep,
+              border: `1px solid ${brand.border}`,
+              boxShadow: brand.shadow,
+            }}
+          >
+            {topic}
+          </AppButton>
+        );
+      })}
+    </div>
+  </div>
+
+</div>
+<div
+  className="mt-6 text-base md:text-lg text-center max-w-2xl mx-auto"
+  style={{ color: brand.slate }}
+>
+  The goal isn’t complexity — it’s making consistent, thoughtful decisions over time.
+</div>
+             <div ref={investmentTopicRef}>
+  {selectedTopic === "Stocks: how equities drive growth" && (
+    <div className="mt-6 space-y-4">
+      <div className="text-xl font-semibold">
+        Stocks: how equities drive growth
+      </div>
+
+      <div className="text-base md:text-lg" style={{ color: brand.slate }}>
+        This overview explains how equities contribute to long-term portfolio growth.
+      </div>
+<ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      170;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+      <div className="rounded-[1.5rem] overflow-hidden" style={{ boxShadow: brand.shadow }}>
+        <iframe
+          src="/stocks-franklin-templeton.pdf"
+          className="w-full h-[700px]"
+        />
+      </div>
+
+      
+    </div>
+  )}
+
+  {selectedTopic === "Portfolio allocation: stocks and bonds" && (
+    <>
+      <AllocationTopicPanel />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      140;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Expense ratios: cost discipline" && (
+    <>
+      <ExpenseTopicPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      140;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Stock diversification" && (
+    <>
+      <StockDiversificationPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      170;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Volatility: how markets move" && (
+    <>
+      <VolatilityTopicPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      140;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Rebalancing: shifting from recent winners to recent laggards" && (
+    <>
+      <RebalancingTopicPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      140;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Bonds: stability and income" && (
+    <>
+      <BondsTopicPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      140;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Bond diversification" && (
+    <>
+      <BondDiversificationPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      170;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Asset location: placing investments in the right accounts" && (
+    <>
+      <AssetLocationTopicPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      140;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Tax-loss harvesting" && (
+    <>
+      <TaxLossHarvestingPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      140;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Spending: investing to support life goals" && (
+    <>
+      <SpendingTopicPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      140;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+
+  {selectedTopic === "Altruist custodial platform" && (
+    <>
+      <AltruistTopicPanel brand={brand} />
+      <ReturnToTopics
+        onClick={() => {
+  setSelectedTopic(null);
+  setTimeout(() => {
+    const y =
+      (investmentSectionTopRef.current?.getBoundingClientRect().top ?? 0) +
+      window.scrollY -
+      140;
+
+    window.scrollTo({
+      top: Math.max(0, y),
+      behavior: "smooth",
+    });
+  }, 0);
+}}
+      />
+    </>
+  )}
+</div>
             </PanelBody>
           </Panel>
         </SectionFrame>
